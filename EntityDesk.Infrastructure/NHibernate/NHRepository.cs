@@ -13,6 +13,7 @@ namespace EntityDesk.Infrastructure.NHibernate
         public async Task<IList<T>> GetAllAsync() => await _session.QueryOver<T>().ListAsync();
         public async Task AddAsync(T entity) => await _session.SaveAsync(entity);
         public async Task UpdateAsync(T entity) => await _session.UpdateAsync(entity);
+        public async Task MergeAsync(T entity) => await _session.MergeAsync(entity);
         public async Task DeleteAsync(T entity) => await _session.DeleteAsync(entity);
     }
 } 

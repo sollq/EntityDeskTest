@@ -6,6 +6,7 @@ namespace EntityDesk.Core.Interfaces
         Task<IList<T>> GetAllAsync();
         Task AddAsync(T entity);
         Task UpdateAsync(T entity);
+        Task MergeAsync(T entity);
         Task DeleteAsync(T entity);
     }
 } 

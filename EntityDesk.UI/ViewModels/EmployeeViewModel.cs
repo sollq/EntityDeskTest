@@ -5,12 +5,16 @@ using System.Windows.Input;
 using System.Threading.Tasks;
 using System;
 using System.Windows;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EntityDesk.UI.ViewModels
 {
     public class EmployeeViewModel : BaseViewModel
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly IServiceScopeFactory _scopeFactory;
+
         public ObservableCollection<Employee> Employees { get; set; } = new();
         public ICommand AddCommand { get; }
         public ICommand EditCommand { get; }
@@ -29,9 +33,10 @@ namespace EntityDesk.UI.ViewModels
             }
         }
 
-        public EmployeeViewModel(IUnitOfWork unitOfWork)
+        public EmployeeViewModel(IServiceProvider serviceProvider, IServiceScopeFactory scopeFactory)
         {
-            _unitOfWork = unitOfWork;
+            _serviceProvider = serviceProvider;
+            _scopeFactory = scopeFactory;
             AddCommand = new RelayCommand(async _ => await AddEmployee());
             EditCommand = new RelayCommand(async emp => await EditEmployee((Employee)emp));
             DeleteCommand = new RelayCommand(async emp => await DeleteEmployee((Employee)emp));
@@ -46,10 +51,14 @@ namespace EntityDesk.UI.ViewModels
         {
             try
             {
-                var employees = await _unitOfWork.Employees.GetAllAsync();
-                Employees.Clear();
-                foreach (var emp in employees)
-                    Employees.Add(emp);
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                    var employees = await unitOfWork.Employees.GetAllAsync();
+                    Employees.Clear();
+                    foreach (var emp in employees)
+                        Employees.Add(emp);
+                }
             }
             catch (Exception ex)
             {
@@ -59,36 +68,65 @@ namespace EntityDesk.UI.ViewModels
 
         private async Task AddEmployee()
         {
-            var vm = new EmployeeEditViewModel();
-            var window = new EmployeeEditWindow { DataContext = vm, Owner = Application.Current.MainWindow };
-            if (window.ShowDialog() == true)
+            var detailViewModel = _serviceProvider.GetRequiredService<EmployeeDetailViewModel>();
+            var detailWindow = new Window
             {
-                var newEmployee = vm.ToEmployee();
-                await _unitOfWork.Employees.AddAsync(newEmployee);
-                await _unitOfWork.CommitAsync();
-                Employees.Add(newEmployee);
-            }
+                Content = new Views.EmployeeDetailView(),
+                DataContext = detailViewModel,
+                Title = "Добавить сотрудника",
+                Owner = Application.Current.MainWindow,
+                Width = 300,
+                Height = 500,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
+
+            detailViewModel.RequestClose += () => detailWindow.Close();
+
+            detailWindow.ShowDialog();
+            await LoadEmployees();
         }
 
         private async Task EditEmployee(Employee employee)
         {
             if (employee == null) return;
-            var vm = new EmployeeEditViewModel(employee);
-            var window = new EmployeeEditWindow { DataContext = vm, Owner = Application.Current.MainWindow };
-            if (window.ShowDialog() == true)
+
+            var detailViewModel = _serviceProvider.GetRequiredService<EmployeeDetailViewModel>();
+            var employeeToEdit = new Employee
             {
-                var updated = vm.ToEmployee(employee);
-                await _unitOfWork.Employees.UpdateAsync(updated);
-                await _unitOfWork.CommitAsync();
-                await LoadEmployees();
-            }
+                Id = employee.Id,
+                FullName = employee.FullName,
+                Position = employee.Position,
+                BirthDate = employee.BirthDate
+            };
+            detailViewModel.Employee = employeeToEdit;
+
+            var detailWindow = new Window
+            {
+                Content = new Views.EmployeeDetailView(),
+                DataContext = detailViewModel,
+                Title = "Редактировать сотрудника",
+                Owner = Application.Current.MainWindow,
+                Width = 400,
+                Height = 500,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
+
+            detailViewModel.RequestClose += () => detailWindow.Close();
+
+            detailWindow.ShowDialog();
+            await LoadEmployees();
         }
 
         private async Task DeleteEmployee(Employee employee)
         {
             if (employee == null) return;
-            await _unitOfWork.Employees.DeleteAsync(employee);
-            await _unitOfWork.CommitAsync();
+
+            using (var scope = _scopeFactory.CreateScope())
+            {
+                var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                await unitOfWork.Employees.DeleteAsync(employee);
+                await unitOfWork.CommitAsync();
+            }
             Employees.Remove(employee);
         }
     }

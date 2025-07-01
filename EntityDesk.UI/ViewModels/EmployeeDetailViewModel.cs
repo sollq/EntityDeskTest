@@ -1,8 +1,10 @@
 using EntityDesk.Core.Models;
+using EntityDesk.Core.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Input;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EntityDesk.UI.ViewModels
 {
@@ -29,21 +31,42 @@ namespace EntityDesk.UI.ViewModels
 
         public event Action? RequestClose;
 
-        public EmployeeDetailViewModel(Employee? employee = null)
+        private readonly IServiceScopeFactory _scopeFactory;
+
+        public EmployeeDetailViewModel(IServiceScopeFactory scopeFactory, Employee? employee = null)
         {
-            Employee = employee ?? new Employee { FullName = string.Empty, Position = Core.Models.Position.Worker, BirthDate = DateTime.Now }; // Инициализируем новую, если null
+            _scopeFactory = scopeFactory;
+            Employee = employee ?? new Employee { FullName = string.Empty, Position = Core.Models.Position.Worker, BirthDate = DateTime.Now };
             AllPositions = Enum.GetValues(typeof(Position)).Cast<Position>().ToList();
 
-            SaveCommand = new RelayCommand(_ => Save());
+            SaveCommand = new RelayCommand(async _ => await Save());
             CancelCommand = new RelayCommand(_ => Cancel());
         }
 
-        private void Save()
+        private async Task Save()
         {
-            // Здесь будет логика сохранения.
-            // После сохранения нужно будет как-то сообщить родительской ViewModel (EmployeeViewModel),
-            // что данные изменены и обновить список.
-            RequestClose?.Invoke();
+            try
+            {
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+
+                    if (Employee.Id == 0)
+                    {
+                        await unitOfWork.Employees.AddAsync(Employee);
+                    }
+                    else
+                    {
+                        await unitOfWork.Employees.MergeAsync(Employee);
+                    }
+                    await unitOfWork.CommitAsync();
+                }
+                RequestClose?.Invoke();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка сохранения сотрудника: {ex.Message}");
+            }
         }
 
         private void Cancel()

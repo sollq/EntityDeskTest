@@ -26,6 +26,7 @@ namespace EntityDesk.UI
             services.AddScoped<EmployeeViewModel>();
             services.AddScoped<CounterpartyViewModel>();
             services.AddScoped<OrderViewModel>();
+            services.AddScoped<EmployeeDetailViewModel>();
             services.AddScoped<MainViewModel>();
             services.AddScoped<MainWindow>();
 
