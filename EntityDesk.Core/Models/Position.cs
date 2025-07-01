@@ -1,8 +1,7 @@
-namespace EntityDesk.Core.Models
+namespace EntityDesk.Core.Models;
+
+public enum Position
 {
-    public enum Position
-    {
-        Manager,
-        Worker
-    }
-} 
+    Manager,
+    Worker
+}

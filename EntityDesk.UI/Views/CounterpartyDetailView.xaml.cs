@@ -1,12 +1,11 @@
 using System.Windows.Controls;
 
-namespace EntityDesk.UI.Views
+namespace EntityDesk.UI.Views;
+
+public partial class CounterpartyDetailView : UserControl
 {
-    public partial class CounterpartyDetailView : UserControl
+    public CounterpartyDetailView()
     {
-        public CounterpartyDetailView()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
-} 
+}

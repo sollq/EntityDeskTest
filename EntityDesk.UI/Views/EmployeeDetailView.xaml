@@ -9,29 +9,32 @@
              Height="300" Width="400">
     <Grid Margin="10">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Text="ФИО:" Margin="5" VerticalAlignment="Center"/>
-        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Employee.FullName, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="ФИО:" Margin="5" VerticalAlignment="Center" />
+        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Employee.FullName, UpdateSourceTrigger=PropertyChanged}"
+                 Margin="5" />
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Text="Должность:" Margin="5" VerticalAlignment="Center"/>
-        <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding AllPositions}" SelectedItem="{Binding Employee.Position}" Margin="5"/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Должность:" Margin="5" VerticalAlignment="Center" />
+        <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding AllPositions}"
+                  SelectedItem="{Binding Employee.Position}" Margin="5" />
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Text="Дата рождения:" Margin="5" VerticalAlignment="Center"/>
-        <DatePicker Grid.Row="2" Grid.Column="1" SelectedDate="{Binding Employee.BirthDate}" Margin="5"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Дата рождения:" Margin="5" VerticalAlignment="Center" />
+        <DatePicker Grid.Row="2" Grid.Column="1" SelectedDate="{Binding Employee.BirthDate}" Margin="5" />
 
-        <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="5">
-            <Button Content="Сохранить" Command="{Binding SaveCommand}" Width="80" Margin="0,0,10,0"/>
-            <Button Content="Отмена" Command="{Binding CancelCommand}" Width="80"/>
+        <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal"
+                    HorizontalAlignment="Right" Margin="5">
+            <Button Content="Сохранить" Command="{Binding SaveCommand}" Width="80" Margin="0,0,10,0" />
+            <Button Content="Отмена" Command="{Binding CancelCommand}" Width="80" />
         </StackPanel>
     </Grid>
-</UserControl> 
+</UserControl>

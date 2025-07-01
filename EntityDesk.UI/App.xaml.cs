@@ -1,50 +1,49 @@
 ﻿using System.Windows;
-using Microsoft.Extensions.DependencyInjection;
 using EntityDesk.Infrastructure.DI;
 using EntityDesk.UI.ViewModels;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace EntityDesk.UI
+namespace EntityDesk.UI;
+
+public partial class App : Application
 {
-    public partial class App : Application
+    private IServiceScope? _mainScope;
+    private ServiceProvider? _serviceProvider;
+
+    protected override void OnStartup(StartupEventArgs e)
     {
-        private ServiceProvider? _serviceProvider;
-        private IServiceScope? _mainScope;
+        var config = new ConfigurationBuilder()
+            .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+            .AddJsonFile("appsettings.json")
+            .Build();
 
-        protected override void OnStartup(StartupEventArgs e)
-        {
-            var config = new ConfigurationBuilder()
-                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                .AddJsonFile("appsettings.json")
-                .Build();
+        var connectionString = config.GetConnectionString("Default");
 
-            var connectionString = config.GetConnectionString("Default");
+        var services = new ServiceCollection();
+        if (connectionString != null)
+            ServiceRegistration.ConfigureServices(services, connectionString);
+        services.AddScoped<EmployeeViewModel>();
+        services.AddScoped<CounterpartyViewModel>();
+        services.AddScoped<OrderViewModel>();
+        services.AddScoped<EmployeeDetailViewModel>();
+        services.AddScoped<OrderDetailViewModel>();
+        services.AddScoped<CounterpartyDetailViewModel>();
+        services.AddScoped<MainViewModel>();
+        services.AddScoped<MainWindow>();
 
-            var services = new ServiceCollection();
-            if (connectionString != null) 
-                ServiceRegistration.ConfigureServices(services, connectionString);
-            services.AddScoped<EmployeeViewModel>();
-            services.AddScoped<CounterpartyViewModel>();
-            services.AddScoped<OrderViewModel>();
-            services.AddScoped<EmployeeDetailViewModel>();
-            services.AddScoped<OrderDetailViewModel>();
-            services.AddScoped<CounterpartyDetailViewModel>();
-            services.AddScoped<MainViewModel>();
-            services.AddScoped<MainWindow>();
+        _serviceProvider = services.BuildServiceProvider();
 
-            _serviceProvider = services.BuildServiceProvider();
+        _mainScope = _serviceProvider.CreateScope();
+        var mainVM = _mainScope.ServiceProvider.GetRequiredService<MainViewModel>();
+        var mainWindow = _mainScope.ServiceProvider.GetRequiredService<MainWindow>();
+        mainWindow.DataContext = mainVM;
+        mainWindow.Show();
+    }
 
-            _mainScope = _serviceProvider.CreateScope();
-            var mainVM = _mainScope.ServiceProvider.GetRequiredService<MainViewModel>();
-            var mainWindow = _mainScope.ServiceProvider.GetRequiredService<MainWindow>();
-            mainWindow.DataContext = mainVM;
-            mainWindow.Show();
-        }
-
-        protected override void OnExit(ExitEventArgs e)
-        {
-            _mainScope?.Dispose();
-            base.OnExit(e);
-        }
+    protected override void OnExit(ExitEventArgs e)
+    {
+        _mainScope?.Dispose();
+        base.OnExit(e);
     }
 }

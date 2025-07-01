@@ -1,13 +1,11 @@
 using System.Windows.Controls;
-using System.Windows;
 
-namespace EntityDesk.UI.Views
+namespace EntityDesk.UI.Views;
+
+public partial class EmployeeView : UserControl
 {
-    public partial class EmployeeView : UserControl
+    public EmployeeView()
     {
-        public EmployeeView()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
-} 
+}

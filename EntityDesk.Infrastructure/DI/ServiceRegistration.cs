@@ -1,43 +1,57 @@
-using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics;
 using EntityDesk.Core.Interfaces;
 using EntityDesk.Infrastructure.NHibernate;
-using NHibernate;
-using FluentNHibernate.Cfg.Db;
-using FluentNHibernate.Cfg;
-using NHibernate.Tool.hbm2ddl;
 using EntityDesk.Infrastructure.NHibernate.Mappings;
+using FluentNHibernate.Cfg;
+using FluentNHibernate.Cfg.Db;
+using Microsoft.Extensions.DependencyInjection;
+using MySql.Data.MySqlClient;
+using NHibernate;
+using NHibernate.Tool.hbm2ddl;
 
-namespace EntityDesk.Infrastructure.DI
+namespace EntityDesk.Infrastructure.DI;
+
+public static class ServiceRegistration
 {
-    public static class ServiceRegistration
+    public static void ConfigureServices(IServiceCollection services, string connectionString)
     {
-        public static void ConfigureServices(IServiceCollection services, string connectionString)
+        try
         {
-            // Register NHibernate SessionFactory
-            services.AddSingleton<ISessionFactory>(sp =>
+            var connectionStringBuilder = new MySqlConnectionStringBuilder(connectionString);
+            var databaseName = connectionStringBuilder.Database;
+            connectionStringBuilder.Database = "";
+
+            using (var connection = new MySqlConnection(connectionStringBuilder.ToString()))
             {
-                var sessionFactory = NHibernateHelper.CreateSessionFactory(connectionString);
-                
-                // Update the database schema
-                var cfg = Fluently.Configure()
-                    .Database(MySQLConfiguration.Standard.ConnectionString(connectionString))
-                    .Mappings(m =>
-                    {
-                        m.FluentMappings.AddFromAssemblyOf<EmployeeMap>(); // Assuming EmployeeMap is in the same assembly as other mappings
-                    })
-                    .BuildConfiguration();
+                connection.Open();
+                using (var command = new MySqlCommand($"CREATE DATABASE IF NOT EXISTS `{databaseName}`", connection))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
 
-                new SchemaUpdate(cfg).Execute(true, true); // Update schema, show SQL, and execute
-                
-                return sessionFactory;
-            });
-
-            // Register NHibernate Session as Scoped
-            services.AddScoped<ISession>(sp => sp.GetRequiredService<ISessionFactory>().OpenSession());
-
-            // Register Unit of Work and Repositories
-            services.AddScoped<IUnitOfWork, NHUnitOfWork>();
-            services.AddScoped(typeof(IRepository<>), typeof(NHRepository<>));
+            Debug.WriteLine($"База данных '{databaseName}' проверена/создана.");
         }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Ошибка при проверке/создании базы данных: {ex.Message}");
+        }
+
+        services.AddSingleton<ISessionFactory>(sp =>
+        {
+            var sessionFactory = NHibernateHelper.CreateSessionFactory(connectionString);
+
+            var cfg = Fluently.Configure()
+                .Database(MySQLConfiguration.Standard.ConnectionString(connectionString))
+                .Mappings(m => { m.FluentMappings.AddFromAssemblyOf<EmployeeMap>(); })
+                .BuildConfiguration();
+
+            new SchemaUpdate(cfg).Execute(true, true);
+
+            return sessionFactory;
+        });
+        services.AddScoped<ISession>(sp => sp.GetRequiredService<ISessionFactory>().OpenSession());
+        services.AddScoped<IUnitOfWork, NHUnitOfWork>();
+        services.AddScoped(typeof(IRepository<>), typeof(NHRepository<>));
     }
-} 
+}

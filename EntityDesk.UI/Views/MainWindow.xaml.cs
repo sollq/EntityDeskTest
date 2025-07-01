@@ -1,21 +1,20 @@
-using EntityDesk.UI.ViewModels;
 using System.Windows;
+using EntityDesk.UI.ViewModels;
 
-namespace EntityDesk.UI
+namespace EntityDesk.UI;
+
+public partial class MainWindow : Window
 {
-    public partial class MainWindow : Window
+    public MainWindow()
     {
-        public MainWindow()
+        InitializeComponent();
+        Loaded += async (s, e) =>
         {
-            InitializeComponent();
-            Loaded += async (s, e) =>
+            if (DataContext is MainViewModel vm)
             {
-                if (DataContext is MainViewModel vm)
-                {
-                    await vm.InitAsync();
-                    DataContext = vm;
-                }
-            };
-        }
+                await vm.InitAsync();
+                DataContext = vm;
+            }
+        };
     }
-} 
+}
