@@ -2,17 +2,42 @@ using Microsoft.Extensions.DependencyInjection;
 using EntityDesk.Core.Interfaces;
 using EntityDesk.Infrastructure.NHibernate;
 using NHibernate;
+using FluentNHibernate.Cfg.Db;
+using FluentNHibernate.Cfg;
+using NHibernate.Tool.hbm2ddl;
+using EntityDesk.Infrastructure.NHibernate.Mappings;
 
 namespace EntityDesk.Infrastructure.DI
 {
     public static class ServiceRegistration
     {
-        public static void AddInfrastructure(this IServiceCollection services, string connectionString)
+        public static void ConfigureServices(IServiceCollection services, string connectionString)
         {
-            services.AddSingleton(provider => NHibernateHelper.CreateSessionFactory(connectionString));
-            services.AddScoped(provider => provider.GetRequiredService<ISessionFactory>().OpenSession());
+            // Register NHibernate SessionFactory
+            services.AddSingleton<ISessionFactory>(sp =>
+            {
+                var sessionFactory = NHibernateHelper.CreateSessionFactory(connectionString);
+                
+                // Update the database schema
+                var cfg = Fluently.Configure()
+                    .Database(MySQLConfiguration.Standard.ConnectionString(connectionString))
+                    .Mappings(m =>
+                    {
+                        m.FluentMappings.AddFromAssemblyOf<EmployeeMap>(); // Assuming EmployeeMap is in the same assembly as other mappings
+                    })
+                    .BuildConfiguration();
+
+                new SchemaUpdate(cfg).Execute(true, true); // Update schema, show SQL, and execute
+                
+                return sessionFactory;
+            });
+
+            // Register NHibernate Session as Scoped
+            services.AddScoped<ISession>(sp => sp.GetRequiredService<ISessionFactory>().OpenSession());
+
+            // Register Unit of Work and Repositories
             services.AddScoped<IUnitOfWork, NHUnitOfWork>();
-            // Здесь можно добавить регистрацию Serilog
+            services.AddScoped(typeof(IRepository<>), typeof(NHRepository<>));
         }
     }
 } 

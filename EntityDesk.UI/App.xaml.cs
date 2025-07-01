@@ -22,7 +22,7 @@ namespace EntityDesk.UI
 
             var services = new ServiceCollection();
             if (connectionString != null) 
-                services.AddInfrastructure(connectionString);
+                ServiceRegistration.ConfigureServices(services, connectionString);
             services.AddScoped<EmployeeViewModel>();
             services.AddScoped<CounterpartyViewModel>();
             services.AddScoped<OrderViewModel>();

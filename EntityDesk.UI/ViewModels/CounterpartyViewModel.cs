@@ -62,7 +62,15 @@ namespace EntityDesk.UI.ViewModels
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка загрузки контрагентов: {ex.Message}");
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    System.Windows.MessageBox.Show(
+                        $"Не удалось загрузить контрагентов.\n\n{ex.Message}",
+                        "Ошибка загрузки контрагентов",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Error
+                    );
+                });
             }
         }
 

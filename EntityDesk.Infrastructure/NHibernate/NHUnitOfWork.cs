@@ -10,7 +10,7 @@ namespace EntityDesk.Infrastructure.NHibernate
     public class NHUnitOfWork : IUnitOfWork, IDisposable
     {
         private readonly ISession _session;
-        private ITransaction _transaction;
+        private ITransaction? _transaction;
 
         public IRepository<Employee> Employees { get; }
         public IRepository<Counterparty> Counterparties { get; }

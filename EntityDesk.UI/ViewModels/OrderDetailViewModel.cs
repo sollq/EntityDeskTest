@@ -69,7 +69,15 @@ namespace EntityDesk.UI.ViewModels
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка загрузки справочных данных для заказа: {ex.Message}");
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    System.Windows.MessageBox.Show(
+                        $"Не удалось загрузить справочные данные для заказа.\n\n{ex.Message}",
+                        "Ошибка загрузки данных",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Error
+                    );
+                });
             }
         }
 
@@ -95,8 +103,15 @@ namespace EntityDesk.UI.ViewModels
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка сохранения заказа: {ex.Message}");
-                // TODO: Добавить нормальное уведомление пользователя об ошибке
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    System.Windows.MessageBox.Show(
+                        $"Не удалось сохранить заказ.\n\n{ex.Message}",
+                        "Ошибка сохранения",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Error
+                    );
+                });
             }
         }
 

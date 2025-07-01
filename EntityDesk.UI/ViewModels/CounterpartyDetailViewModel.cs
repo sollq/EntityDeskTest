@@ -62,7 +62,15 @@ namespace EntityDesk.UI.ViewModels
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка загрузки кураторов для контрагента: {ex.Message}");
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    System.Windows.MessageBox.Show(
+                        $"Не удалось загрузить список кураторов для контрагента.\n\n{ex.Message}",
+                        "Ошибка загрузки данных",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Error
+                    );
+                });
             }
         }
 
@@ -88,8 +96,15 @@ namespace EntityDesk.UI.ViewModels
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка сохранения контрагента: {ex.Message}");
-                // TODO: Добавить нормальное уведомление пользователя об ошибке
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    System.Windows.MessageBox.Show(
+                        $"Не удалось сохранить контрагента.\n\n{ex.Message}",
+                        "Ошибка сохранения",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Error
+                    );
+                });
             }
         }
 

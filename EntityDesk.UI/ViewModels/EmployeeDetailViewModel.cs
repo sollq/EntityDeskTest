@@ -65,7 +65,15 @@ namespace EntityDesk.UI.ViewModels
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка сохранения сотрудника: {ex.Message}");
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    System.Windows.MessageBox.Show(
+                        $"Не удалось сохранить сотрудника.\n\n{ex.Message}",
+                        "Ошибка сохранения",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Error
+                    );
+                });
             }
         }
 

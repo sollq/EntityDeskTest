@@ -76,7 +76,15 @@ namespace EntityDesk.UI.ViewModels
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка загрузки заказов: {ex.Message}");
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    System.Windows.MessageBox.Show(
+                        $"Не удалось загрузить заказы.\n\n{ex.Message}",
+                        "Ошибка загрузки заказов",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Error
+                    );
+                });
             }
         }
         private async Task LoadEmployees()
@@ -94,7 +102,15 @@ namespace EntityDesk.UI.ViewModels
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка загрузки сотрудников: {ex.Message}");
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    System.Windows.MessageBox.Show(
+                        $"Не удалось загрузить сотрудников.\n\n{ex.Message}",
+                        "Ошибка загрузки сотрудников",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Error
+                    );
+                });
             }
         }
         private async Task LoadCounterparties()
@@ -112,7 +128,15 @@ namespace EntityDesk.UI.ViewModels
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка загрузки контрагентов: {ex.Message}");
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    System.Windows.MessageBox.Show(
+                        $"Не удалось загрузить контрагентов.\n\n{ex.Message}",
+                        "Ошибка загрузки контрагентов",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Error
+                    );
+                });
             }
         }
         private async Task AddOrder()
