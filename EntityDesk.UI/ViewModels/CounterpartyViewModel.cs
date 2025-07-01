@@ -4,13 +4,18 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using System.Threading.Tasks;
 using System;
+using System.Windows;
+using Microsoft.Extensions.DependencyInjection;
+using NHibernate;
 
 namespace EntityDesk.UI.ViewModels
 {
     public class CounterpartyViewModel : BaseViewModel
     {
-        private readonly IUnitOfWork _unitOfWork;
-        public ObservableCollection<Counterparty> Counterparties { get; set; } = new();
+        private readonly IServiceProvider _serviceProvider;
+        private readonly IServiceScopeFactory _scopeFactory;
+
+        public ObservableCollection<Counterparty> Counterparties { get; set; } = [];
         public ICommand AddCommand { get; }
         public ICommand EditCommand { get; }
         public ICommand DeleteCommand { get; }
@@ -28,9 +33,10 @@ namespace EntityDesk.UI.ViewModels
             }
         }
 
-        public CounterpartyViewModel(IUnitOfWork unitOfWork)
+        public CounterpartyViewModel(IServiceProvider serviceProvider, IServiceScopeFactory scopeFactory)
         {
-            _unitOfWork = unitOfWork;
+            _serviceProvider = serviceProvider;
+            _scopeFactory = scopeFactory;
             AddCommand = new RelayCommand(async _ => await AddCounterparty());
             EditCommand = new RelayCommand(async c => await EditCounterparty((Counterparty)c));
             DeleteCommand = new RelayCommand(async c => await DeleteCounterparty((Counterparty)c));
@@ -45,7 +51,11 @@ namespace EntityDesk.UI.ViewModels
         {
             try
             {
-                var counterparties = await _unitOfWork.Counterparties.GetAllAsync();
+                using var scope = _scopeFactory.CreateScope();
+                var session = scope.ServiceProvider.GetRequiredService<ISession>();
+                var counterparties = await session.QueryOver<Counterparty>()
+                                                  .Fetch(NHibernate.SelectMode.Fetch, x => x.Curator)
+                                                  .ListAsync();
                 Counterparties.Clear();
                 foreach (var c in counterparties)
                     Counterparties.Add(c);
@@ -58,17 +68,62 @@ namespace EntityDesk.UI.ViewModels
 
         private async Task AddCounterparty()
         {
-            // TODO: Реализовать добавление через форму
+            var detailViewModel = _serviceProvider.GetRequiredService<CounterpartyDetailViewModel>();
+            var detailWindow = new Window
+            {
+                Content = new Views.CounterpartyDetailView(),
+                DataContext = detailViewModel,
+                Title = "Добавить контрагента",
+                Owner = Application.Current.MainWindow,
+                Width = 400,
+                Height = 450,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
+
+            detailViewModel.RequestClose += () => detailWindow.Close();
+
+            detailWindow.ShowDialog();
+            await LoadCounterparties();
         }
         private async Task EditCounterparty(Counterparty counterparty)
         {
-            // TODO: Реализовать редактирование через форму
+            if (counterparty == null) return;
+
+            var detailViewModel = _serviceProvider.GetRequiredService<CounterpartyDetailViewModel>();
+            var counterpartyToEdit = new Counterparty
+            {
+                Id = counterparty.Id,
+                Name = counterparty.Name,
+                INN = counterparty.INN,
+                Curator = counterparty.Curator
+            };
+            detailViewModel.Counterparty = counterpartyToEdit;
+
+            var detailWindow = new Window
+            {
+                Content = new Views.CounterpartyDetailView(),
+                DataContext = detailViewModel,
+                Title = "Редактировать контрагента",
+                Owner = Application.Current.MainWindow,
+                Width = 400,
+                Height = 450,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
+
+            detailViewModel.RequestClose += () => detailWindow.Close();
+
+            detailWindow.ShowDialog();
+            await LoadCounterparties();
         }
         private async Task DeleteCounterparty(Counterparty counterparty)
         {
             if (counterparty == null) return;
-            await _unitOfWork.Counterparties.DeleteAsync(counterparty);
-            await _unitOfWork.CommitAsync();
+            using (var scope = _scopeFactory.CreateScope())
+            {
+                var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                await unitOfWork.Counterparties.DeleteAsync(counterparty);
+                await unitOfWork.CommitAsync();
+            }
             Counterparties.Remove(counterparty);
         }
     }

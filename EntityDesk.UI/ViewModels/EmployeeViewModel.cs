@@ -11,11 +11,10 @@ namespace EntityDesk.UI.ViewModels
 {
     public class EmployeeViewModel : BaseViewModel
     {
-        private readonly IUnitOfWork _unitOfWork;
         private readonly IServiceProvider _serviceProvider;
         private readonly IServiceScopeFactory _scopeFactory;
 
-        public ObservableCollection<Employee> Employees { get; set; } = new();
+        public ObservableCollection<Employee> Employees { get; set; } = [];
         public ICommand AddCommand { get; }
         public ICommand EditCommand { get; }
         public ICommand DeleteCommand { get; }
@@ -51,14 +50,12 @@ namespace EntityDesk.UI.ViewModels
         {
             try
             {
-                using (var scope = _scopeFactory.CreateScope())
-                {
-                    var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                    var employees = await unitOfWork.Employees.GetAllAsync();
-                    Employees.Clear();
-                    foreach (var emp in employees)
-                        Employees.Add(emp);
-                }
+                using var scope = _scopeFactory.CreateScope();
+                var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                var employees = await unitOfWork.Employees.GetAllAsync();
+                Employees.Clear();
+                foreach (var emp in employees)
+                    Employees.Add(emp);
             }
             catch (Exception ex)
             {
