@@ -1,0 +1,47 @@
+<UserControl x:Class="EntityDesk.UI.Views.OrderDetailView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:viewmodels="clr-namespace:EntityDesk.UI.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=viewmodels:OrderDetailViewModel, IsDesignTimeCreatable=True}"
+             Height="450" Width="400">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Дата:" Margin="5" VerticalAlignment="Center"/>
+        <DatePicker Grid.Row="0" Grid.Column="1" SelectedDate="{Binding Order.Date}" Margin="5"/>
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Сумма:" Margin="5" VerticalAlignment="Center"/>
+        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Order.Amount, UpdateSourceTrigger=PropertyChanged}" Margin="5"/>
+
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Сотрудник:" Margin="5" VerticalAlignment="Center"/>
+        <ComboBox Grid.Row="2" Grid.Column="1" 
+                  ItemsSource="{Binding AllEmployees}"
+                  SelectedItem="{Binding Order.Employee}"
+                  DisplayMemberPath="FullName" Margin="5"/>
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="Контрагент:" Margin="5" VerticalAlignment="Center"/>
+        <ComboBox Grid.Row="3" Grid.Column="1"
+                  ItemsSource="{Binding AllCounterparties}"
+                  SelectedItem="{Binding Order.Counterparty}"
+                  DisplayMemberPath="Name" Margin="5"/>
+
+        <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="5">
+            <Button Content="Сохранить" Command="{Binding SaveCommand}" Width="80" Margin="0,0,10,0"/>
+            <Button Content="Отмена" Command="{Binding CancelCommand}" Width="80"/>
+        </StackPanel>
+    </Grid>
+</UserControl> 
