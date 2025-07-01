@@ -16,7 +16,7 @@ namespace EntityDesk.Migrations.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Employee",
+                name: "Employees",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -28,12 +28,12 @@ namespace EntityDesk.Migrations.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Employee", x => x.Id);
+                    table.PrimaryKey("PK_Employees", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Counterparty",
+                name: "Counterparties",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -46,18 +46,18 @@ namespace EntityDesk.Migrations.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Counterparty", x => x.Id);
+                    table.PrimaryKey("PK_Counterparties", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Counterparty_Employee_CuratorId",
+                        name: "FK_Counterparties_Employees_CuratorId",
                         column: x => x.CuratorId,
-                        principalTable: "Employee",
+                        principalTable: "Employees",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Order",
+                name: "Orders",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -69,35 +69,35 @@ namespace EntityDesk.Migrations.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Order", x => x.Id);
+                    table.PrimaryKey("PK_Orders", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Order_Counterparty_CounterpartyId",
+                        name: "FK_Orders_Counterparties_CounterpartyId",
                         column: x => x.CounterpartyId,
-                        principalTable: "Counterparty",
+                        principalTable: "Counterparties",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Order_Employee_EmployeeId",
+                        name: "FK_Orders_Employees_EmployeeId",
                         column: x => x.EmployeeId,
-                        principalTable: "Employee",
+                        principalTable: "Employees",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Counterparty_CuratorId",
-                table: "Counterparty",
+                name: "IX_Counterparties_CuratorId",
+                table: "Counterparties",
                 column: "CuratorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Order_CounterpartyId",
-                table: "Order",
+                name: "IX_Orders_CounterpartyId",
+                table: "Orders",
                 column: "CounterpartyId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Order_EmployeeId",
-                table: "Order",
+                name: "IX_Orders_EmployeeId",
+                table: "Orders",
                 column: "EmployeeId");
         }
 
@@ -105,13 +105,13 @@ namespace EntityDesk.Migrations.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Order");
+                name: "Orders");
 
             migrationBuilder.DropTable(
-                name: "Counterparty");
+                name: "Counterparties");
 
             migrationBuilder.DropTable(
-                name: "Employee");
+                name: "Employees");
         }
     }
 }

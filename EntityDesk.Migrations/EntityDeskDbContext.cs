@@ -11,9 +11,9 @@ namespace EntityDesk.Migrations
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Employee>().ToTable("Employee");
-            modelBuilder.Entity<Counterparty>().ToTable("Counterparty");
-            modelBuilder.Entity<Order>().ToTable("Order");
+            modelBuilder.Entity<Employee>().ToTable("Employees");
+            modelBuilder.Entity<Counterparty>().ToTable("Counterparties");
+            modelBuilder.Entity<Order>().ToTable("Orders");
             modelBuilder.Entity<Employee>().Property(e => e.Position).HasConversion<int>();
             modelBuilder.Entity<Counterparty>()
                 .HasOne(c => c.Curator)

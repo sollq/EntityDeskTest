@@ -4,12 +4,16 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using System.Threading.Tasks;
 using System;
+using System.Windows;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EntityDesk.UI.ViewModels
 {
     public class OrderViewModel : BaseViewModel
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly IServiceScopeFactory _scopeFactory;
+
         public ObservableCollection<Order> Orders { get; set; } = [];
         public ObservableCollection<Employee> Employees { get; set; } = new();
         public ObservableCollection<Counterparty> Counterparties { get; set; } = new();
@@ -30,9 +34,10 @@ namespace EntityDesk.UI.ViewModels
             }
         }
 
-        public OrderViewModel(IUnitOfWork unitOfWork)
+        public OrderViewModel(IServiceProvider serviceProvider, IServiceScopeFactory scopeFactory)
         {
-            _unitOfWork = unitOfWork;
+            _serviceProvider = serviceProvider;
+            _scopeFactory = scopeFactory;
             AddCommand = new RelayCommand(async _ => await AddOrder());
             EditCommand = new RelayCommand(async o => await EditOrder((Order)o));
             DeleteCommand = new RelayCommand(async o => await DeleteOrder((Order)o));
@@ -54,10 +59,14 @@ namespace EntityDesk.UI.ViewModels
         {
             try
             {
-                var orders = await _unitOfWork.Orders.GetAllAsync();
-                Orders.Clear();
-                foreach (var o in orders)
-                    Orders.Add(o);
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                    var orders = await unitOfWork.Orders.GetAllAsync();
+                    Orders.Clear();
+                    foreach (var o in orders)
+                        Orders.Add(o);
+                }
             }
             catch (Exception ex)
             {
@@ -68,10 +77,14 @@ namespace EntityDesk.UI.ViewModels
         {
             try
             {
-                var employees = await _unitOfWork.Employees.GetAllAsync();
-                Employees.Clear();
-                foreach (var e in employees)
-                    Employees.Add(e);
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                    var employees = await unitOfWork.Employees.GetAllAsync();
+                    Employees.Clear();
+                    foreach (var e in employees)
+                        Employees.Add(e);
+                }
             }
             catch (Exception ex)
             {
@@ -82,10 +95,14 @@ namespace EntityDesk.UI.ViewModels
         {
             try
             {
-                var counterparties = await _unitOfWork.Counterparties.GetAllAsync();
-                Counterparties.Clear();
-                foreach (var c in counterparties)
-                    Counterparties.Add(c);
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                    var counterparties = await unitOfWork.Counterparties.GetAllAsync();
+                    Counterparties.Clear();
+                    foreach (var c in counterparties)
+                        Counterparties.Add(c);
+                }
             }
             catch (Exception ex)
             {
@@ -94,17 +111,63 @@ namespace EntityDesk.UI.ViewModels
         }
         private async Task AddOrder()
         {
-            // TODO: Реализовать добавление через форму
+            var detailViewModel = _serviceProvider.GetRequiredService<OrderDetailViewModel>();
+            var detailWindow = new Window
+            {
+                Content = new Views.OrderDetailView(),
+                DataContext = detailViewModel,
+                Title = "Добавить заказ",
+                Owner = Application.Current.MainWindow,
+                Width = 400,
+                Height = 550,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
+
+            detailViewModel.RequestClose += () => detailWindow.Close();
+
+            detailWindow.ShowDialog();
+            await LoadAll();
         }
         private async Task EditOrder(Order order)
         {
-            // TODO: Реализовать редактирование через форму
+            if (order == null) return;
+
+            var detailViewModel = _serviceProvider.GetRequiredService<OrderDetailViewModel>();
+            var orderToEdit = new Order
+            {
+                Id = order.Id,
+                Date = order.Date,
+                Amount = order.Amount,
+                Employee = order.Employee,
+                Counterparty = order.Counterparty
+            };
+            detailViewModel.Order = orderToEdit;
+
+            var detailWindow = new Window
+            {
+                Content = new Views.OrderDetailView(),
+                DataContext = detailViewModel,
+                Title = "Редактировать заказ",
+                Owner = Application.Current.MainWindow,
+                Width = 400,
+                Height = 550,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
+
+            detailViewModel.RequestClose += () => detailWindow.Close();
+
+            detailWindow.ShowDialog();
+            await LoadAll();
         }
         private async Task DeleteOrder(Order order)
         {
             if (order == null) return;
-            await _unitOfWork.Orders.DeleteAsync(order);
-            await _unitOfWork.CommitAsync();
+            using (var scope = _scopeFactory.CreateScope())
+            {
+                var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                await unitOfWork.Orders.DeleteAsync(order);
+                await unitOfWork.CommitAsync();
+            }
             Orders.Remove(order);
         }
     }

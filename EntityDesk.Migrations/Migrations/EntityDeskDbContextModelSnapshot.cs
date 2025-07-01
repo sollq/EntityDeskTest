@@ -45,7 +45,7 @@ namespace EntityDesk.Migrations.Migrations
 
                     b.HasIndex("CuratorId");
 
-                    b.ToTable("Counterparty", (string)null);
+                    b.ToTable("Counterparties", (string)null);
                 });
 
             modelBuilder.Entity("EntityDesk.Core.Models.Employee", b =>
@@ -68,7 +68,7 @@ namespace EntityDesk.Migrations.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Employee", (string)null);
+                    b.ToTable("Employees", (string)null);
                 });
 
             modelBuilder.Entity("EntityDesk.Core.Models.Order", b =>
@@ -97,7 +97,7 @@ namespace EntityDesk.Migrations.Migrations
 
                     b.HasIndex("EmployeeId");
 
-                    b.ToTable("Order", (string)null);
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("EntityDesk.Core.Models.Counterparty", b =>

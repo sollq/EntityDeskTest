@@ -7,7 +7,7 @@ namespace EntityDesk.Infrastructure.NHibernate.Mappings
     {
         public OrderMap()
         {
-            Table("`Order`");
+            Table("Orders");
             Id(x => x.Id).GeneratedBy.Identity().Column("Id");
             Map(x => x.Date).Not.Nullable().Column("Date");
             Map(x => x.Amount).Not.Nullable().Column("Amount");

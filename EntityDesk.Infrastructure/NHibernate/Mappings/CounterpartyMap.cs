@@ -7,7 +7,7 @@ namespace EntityDesk.Infrastructure.NHibernate.Mappings
     {
         public CounterpartyMap()
         {
-            Table("Counterparty");
+            Table("Counterparties");
             Id(x => x.Id).GeneratedBy.Identity().Column("Id");
             Map(x => x.Name).Not.Nullable().Column("Name");
             Map(x => x.INN).Not.Nullable().Column("INN");
