@@ -148,6 +148,14 @@ public class CounterpartyViewModel : BaseViewModel
     private async Task DeleteCounterparty(Counterparty counterparty)
     {
         if (counterparty == null) return;
+        var result = MessageBox.Show(
+            "Вы уверены? Это действие нельзя будет отменить.",
+            "Подтверждение удаления",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+                if (result != MessageBoxResult.Yes)
+                    return;
         using (var scope = _scopeFactory.CreateScope())
         {
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
