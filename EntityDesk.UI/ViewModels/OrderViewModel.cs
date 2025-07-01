@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System;
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
+using NHibernate;
 
 namespace EntityDesk.UI.ViewModels
 {
@@ -61,8 +62,13 @@ namespace EntityDesk.UI.ViewModels
             {
                 using (var scope = _scopeFactory.CreateScope())
                 {
-                    var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                    var orders = await unitOfWork.Orders.GetAllAsync();
+                    var session = scope.ServiceProvider.GetRequiredService<ISession>();
+                    
+                    var orders = await session.QueryOver<Order>()
+                                              .Fetch(NHibernate.SelectMode.Fetch, x => x.Employee)
+                                              .Fetch(NHibernate.SelectMode.Fetch, x => x.Counterparty)
+                                              .ListAsync();
+
                     Orders.Clear();
                     foreach (var o in orders)
                         Orders.Add(o);
