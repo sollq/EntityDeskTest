@@ -148,21 +148,45 @@ public class CounterpartyViewModel : BaseViewModel
     private async Task DeleteCounterparty(Counterparty counterparty)
     {
         if (counterparty == null) return;
-        var result = MessageBox.Show(
-            "Вы уверены? Это действие нельзя будет отменить.",
-            "Подтверждение удаления",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Warning);
 
-                if (result != MessageBoxResult.Yes)
-                    return;
-        using (var scope = _scopeFactory.CreateScope())
+        var result = MessageBox.Show($"Вы уверены, что хотите удалить контрагента \"{counterparty.Name}\" ?",
+                                     "Подтверждение удаления",
+                                     MessageBoxButton.YesNo,
+                                     MessageBoxImage.Warning);
+
+        if (result != MessageBoxResult.Yes) return;
+
+        try
         {
-            var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-            await unitOfWork.Counterparties.DeleteAsync(counterparty);
-            await unitOfWork.CommitAsync();
-        }
+            using (var scope = _scopeFactory.CreateScope())
+            {
+                var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                var session = scope.ServiceProvider.GetRequiredService<ISession>();
 
-        Counterparties.Remove(counterparty);
+                var hasRelatedOrders = await session.QueryOver<Order>()
+                                                    .Where(o => o.Counterparty.Id == counterparty.Id)
+                                                    .RowCountAsync() > 0;
+
+                if (hasRelatedOrders)
+                {
+                    MessageBox.Show($"Невозможно удалить контрагента \"{counterparty.Name}\", так как с ним связаны заказы. Сначала удалите связанные заказы.",
+                                    "Ошибка удаления",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Error);
+                    return;
+                }
+
+                await unitOfWork.Counterparties.DeleteAsync(counterparty);
+                await unitOfWork.CommitAsync();
+            }
+            Counterparties.Remove(counterparty);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Ошибка при удалении контрагента: {ex.Message}",
+                            "Ошибка",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+        }
     }
 }

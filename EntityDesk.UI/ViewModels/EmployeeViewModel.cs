@@ -5,6 +5,7 @@ using EntityDesk.Core.Interfaces;
 using EntityDesk.Core.Models;
 using EntityDesk.UI.Views;
 using Microsoft.Extensions.DependencyInjection;
+using NHibernate;
 
 namespace EntityDesk.UI.ViewModels;
 
@@ -137,21 +138,49 @@ public class EmployeeViewModel : BaseViewModel
     private async Task DeleteEmployee(Employee employee)
     {
         if (employee == null) return;
-        var result = MessageBox.Show(
-            "Вы уверены? Это действие нельзя будет отменить.",
-            "Подтверждение удаления",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Warning);
 
-        if (result != MessageBoxResult.Yes)
-            return;
-        using (var scope = _scopeFactory.CreateScope())
+        var result = MessageBox.Show($"Вы уверены, что хотите удалить сотрудника \"{employee.FullName}\" ?",
+                                     "Подтверждение удаления",
+                                     MessageBoxButton.YesNo,
+                                     MessageBoxImage.Warning);
+
+        if (result != MessageBoxResult.Yes) return;
+
+        try
         {
-            var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-            await unitOfWork.Employees.DeleteAsync(employee);
-            await unitOfWork.CommitAsync();
-        }
+            using (var scope = _scopeFactory.CreateScope())
+            {
+                var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                var session = scope.ServiceProvider.GetRequiredService<ISession>();
 
-        Employees.Remove(employee);
+                var hasRelatedCounterparties = await session.QueryOver<Counterparty>()
+                                                            .Where(c => c.Curator.Id == employee.Id)
+                                                            .RowCountAsync() > 0;
+
+                var hasRelatedOrders = await session.QueryOver<Order>()
+                                                    .Where(o => o.Employee.Id == employee.Id)
+                                                    .RowCountAsync() > 0;
+
+                if (hasRelatedCounterparties || hasRelatedOrders)
+                {
+                    MessageBox.Show($"Невозможно удалить сотрудника \"{employee.FullName}\", так как с ним связаны контрагенты или заказы. Сначала удалите связанные записи.",
+                                    "Ошибка удаления",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Error);
+                    return;
+                }
+
+                await unitOfWork.Employees.DeleteAsync(employee);
+                await unitOfWork.CommitAsync();
+            }
+            Employees.Remove(employee);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Ошибка при удалении сотрудника: {ex.Message}",
+                            "Ошибка",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+        }
     }
 }
