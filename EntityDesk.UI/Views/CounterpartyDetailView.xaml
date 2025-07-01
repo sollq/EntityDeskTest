@@ -6,7 +6,7 @@
              xmlns:viewmodels="clr-namespace:EntityDesk.UI.ViewModels"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=viewmodels:CounterpartyDetailViewModel, IsDesignTimeCreatable=True}"
-             Height="350" Width="400">
+             Height="250" Width="600">
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -24,11 +24,11 @@
         <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Counterparty.Name, UpdateSourceTrigger=PropertyChanged}"
                  Margin="5" />
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Text="ИНН:" Margin="5" VerticalAlignment="Center" />
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="ИНН:" VerticalAlignment="Center" />
         <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Counterparty.INN, UpdateSourceTrigger=PropertyChanged}"
                  Margin="5" />
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Text="Куратор:" Margin="5" VerticalAlignment="Center" />
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Куратор:" VerticalAlignment="Center" />
         <ComboBox Grid.Row="2" Grid.Column="1"
                   ItemsSource="{Binding AllCurators}"
                   SelectedItem="{Binding Counterparty.Curator}"
@@ -36,7 +36,7 @@
 
         <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal"
                     HorizontalAlignment="Right" Margin="5">
-            <Button Content="Сохранить" Command="{Binding SaveCommand}" Width="80" Margin="0,0,10,0" />
+            <Button Content="Сохранить" Command="{Binding SaveCommand}" Width="80" />
             <Button Content="Отмена" Command="{Binding CancelCommand}" Width="80" />
         </StackPanel>
     </Grid>

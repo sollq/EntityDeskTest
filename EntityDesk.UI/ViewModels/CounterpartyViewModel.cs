@@ -85,7 +85,7 @@ public class CounterpartyViewModel : BaseViewModel
             Title = "Добавить контрагента",
             Owner = Application.Current.MainWindow,
             Width = 600,
-            Height = 600,
+            Height = 250,
             WindowStartupLocation = WindowStartupLocation.CenterOwner
         };
 
@@ -135,7 +135,7 @@ public class CounterpartyViewModel : BaseViewModel
             Title = "Редактировать контрагента",
             Owner = Application.Current.MainWindow,
             Width = 600,
-            Height = 600,
+            Height = 250,
             WindowStartupLocation = WindowStartupLocation.CenterOwner
         };
 

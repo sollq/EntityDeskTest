@@ -75,7 +75,7 @@ public class EmployeeViewModel : BaseViewModel
             Title = "Добавить сотрудника",
             Owner = Application.Current.MainWindow,
             Width = 600,
-            Height = 600,
+            Height = 250,
             WindowStartupLocation = WindowStartupLocation.CenterOwner
         };
 
@@ -124,7 +124,7 @@ public class EmployeeViewModel : BaseViewModel
             Title = "Редактировать сотрудника",
             Owner = Application.Current.MainWindow,
             Width = 400,
-            Height = 500,
+            Height = 250,
             WindowStartupLocation = WindowStartupLocation.CenterOwner
         };
 

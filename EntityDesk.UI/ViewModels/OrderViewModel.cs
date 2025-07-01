@@ -147,7 +147,7 @@ public class OrderViewModel : BaseViewModel
             Title = "Добавить заказ",
             Owner = Application.Current.MainWindow,
             Width = 600,
-            Height = 600,
+            Height = 250,
             WindowStartupLocation = WindowStartupLocation.CenterOwner
         };
 
@@ -179,7 +179,7 @@ public class OrderViewModel : BaseViewModel
             Title = "Редактировать заказ",
             Owner = Application.Current.MainWindow,
             Width = 600,
-            Height = 600,
+            Height = 250,
             WindowStartupLocation = WindowStartupLocation.CenterOwner
         };
 

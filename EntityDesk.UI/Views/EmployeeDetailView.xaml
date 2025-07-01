@@ -6,7 +6,7 @@
              xmlns:viewmodels="clr-namespace:EntityDesk.UI.ViewModels"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=viewmodels:EmployeeDetailViewModel, IsDesignTimeCreatable=True}"
-             Height="300" Width="400">
+             Height="250" Width="400">
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
